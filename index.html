@@ -75,7 +75,7 @@
     h2 {
       font-weight: 300;
       font-size: 1.3rem;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       color: #ffd580;
       letter-spacing: 1.1px;
       text-shadow: 0 0 4px #ffa500bb;
@@ -83,16 +83,13 @@
 
     label {
       display: block;
-      text-align: left;
-      margin-bottom: 8px;
       font-weight: 600;
       color: #ffe6b3;
-      font-size: 0.9rem;
       user-select: none;
+      margin-bottom: 5px;
     }
 
     input, select {
-      width: 100%;
       padding: 14px 18px;
       border-radius: 12px;
       border: none;
@@ -111,6 +108,8 @@
       background-repeat: no-repeat;
       background-position: right 15px center;
       background-size: 14px 10px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     select option {
@@ -148,6 +147,7 @@
         inset 0 -3px 8px #ff660000;
       transition: background 0.4s ease, box-shadow 0.3s ease;
       user-select: none;
+      width: 100%;
     }
 
     button:hover {
@@ -177,9 +177,10 @@
     .error-msg {
       color: #ff6666;
       font-weight: 600;
-      margin-top: 6px;
+      margin-top: 4px;
       font-size: 0.85rem;
       text-align: left;
+      min-height: 18px;
     }
 
     footer {
@@ -193,14 +194,14 @@
       text-shadow: 0 0 3px #000;
     }
 
-    /* Pizzas caindo */
+    /* Pizzas caindo - correção */
     .pizza-falling {
       position: fixed;
-      top: -50px;
+      top: 0;
       pointer-events: none;
       user-select: none;
       z-index: 9999;
-      opacity: 0.8;
+      opacity: 1;
       animation-name: fallPizza;
       animation-timing-function: linear;
       animation-fill-mode: forwards;
@@ -212,11 +213,11 @@
     @keyframes fallPizza {
       0% {
         transform: translateY(0) rotate(0deg);
-        opacity: 0.9;
+        opacity: 1;
       }
       100% {
         transform: translateY(110vh) rotate(360deg);
-        opacity: 0.2;
+        opacity: 0;
       }
     }
 
@@ -248,6 +249,85 @@
       border-radius: 50%;
     }
 
+    /* Layout dos itens de pedido (sabor + quantidade) */
+    #itensPedido {
+      margin-bottom: 20px;
+    }
+
+    .itemPedido {
+      margin-bottom: 20px;
+      border: 2px solid rgba(255, 153, 0, 0.8);
+      padding: 12px 15px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.12);
+
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-start;
+      position: relative;
+    }
+
+    .itemPedido label {
+      flex-basis: 100%;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #ffe6b3;
+      user-select: none;
+    }
+
+    .itemPedido select,
+    .itemPedido input {
+      flex: 1 1 140px;
+      margin-top: 0;
+      width: auto;
+      min-width: 120px;
+      box-sizing: border-box;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      border: none;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 500;
+      outline-offset: 3px;
+      outline-color: #ffb347;
+      transition: background 0.3s ease, outline-color 0.3s ease;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    .itemPedido select:focus,
+    .itemPedido input:focus {
+      background: rgba(255, 255, 255, 0.35);
+      outline-color: #ff9900;
+      color: #000;
+    }
+
+    /* Botão remover à direita, alinhado com os selects */
+    .removerItem {
+      position: static;
+      margin-left: auto;
+      align-self: center;
+      background: transparent;
+      border: none;
+      color: #ffb347;
+      font-size: 1.5rem;
+      cursor: pointer;
+      font-weight: 700;
+      user-select: none;
+      transition: color 0.3s ease;
+      padding: 0 6px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .removerItem:hover {
+      color: #ff6600;
+    }
+
     @media (max-width: 520px) {
       .container {
         margin: 40px 15px 30px;
@@ -272,6 +352,21 @@
         height: 60px;
         border-width: 2.5px;
       }
+      .itemPedido {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .itemPedido select,
+      .itemPedido input {
+        flex-basis: 100%;
+        width: 100%;
+        min-width: auto;
+      }
+      .removerItem {
+        margin-left: 0;
+        margin-top: 10px;
+        align-self: flex-start;
+      }
     }
   </style>
 </head>
@@ -290,26 +385,40 @@
     />
     <h1>Pizzaria Mirim</h1>
     <h2>Faça seu pedido</h2>
-    <form id="pedidoForm" novalidate aria-describedby="pixInfo">
-      <label for="sabor">Sabor</label>
-      <select id="sabor" required aria-required="true">
-        <option value="" disabled selected>Selecione um sabor</option>
-        <option value="Mussarela">Mussarela</option>
-        <option value="Calabresa">Calabresa</option>
-      </select>
-      <div class="error-msg" id="erroSabor"></div>
 
-      <label for="quantidade">Quantidade</label>
-      <input
-        id="quantidade"
-        type="number"
-        min="1"
-        value="1"
-        required
-        aria-required="true"
-        aria-label="Quantidade de pizzas"
-      />
-      <div class="error-msg" id="erroQuantidade"></div>
+    <form id="pedidoForm" novalidate aria-describedby="pixInfo">
+
+      <div id="itensPedido">
+        <!-- Primeiro item inicial -->
+        <div class="itemPedido">
+          <label for="sabor1">Sabor</label>
+          <select id="sabor1" class="sabor" required aria-required="true" aria-label="Sabor da pizza">
+            <option value="" disabled selected>Selecione um sabor</option>
+            <option value="Mussarela">Mussarela</option>
+            <option value="Calabresa">Calabresa</option>
+          </select>
+          <div class="error-msg"></div>
+
+          <label for="quantidade1">Quantidade</label>
+          <input
+            id="quantidade1"
+            type="number"
+            min="1"
+            value="1"
+            required
+            aria-required="true"
+            class="quantidade"
+            aria-label="Quantidade de pizzas para este sabor"
+          />
+          <div class="error-msg"></div>
+
+          <button type="button" class="removerItem" aria-label="Remover este sabor do pedido" title="Remover sabor">✕</button>
+        </div>
+      </div>
+
+      <button type="button" id="adicionarSabor" aria-label="Adicionar mais sabor ao pedido" style="margin-top: 0; margin-bottom: 25px;">
+        + Adicionar sabor
+      </button>
 
       <label for="nome">Nome completo</label>
       <input
@@ -369,6 +478,7 @@
   </footer>
 
   <script>
+    // Máscara CPF
     function mascaraCPF(cpf) {
       return cpf
         .replace(/\D/g, "")
@@ -378,6 +488,7 @@
         .substring(0, 14);
     }
 
+    // Máscara WhatsApp
     function mascaraWhats(value) {
       return value
         .replace(/\D/g, "")
@@ -386,6 +497,7 @@
         .substring(0, 15);
     }
 
+    // Validação CPF
     function validarCPF(strCPF) {
       strCPF = strCPF.replace(/[^\d]+/g, "");
       if (strCPF.length !== 11) return false;
@@ -412,104 +524,171 @@
       return true;
     }
 
-    function limparErros() {
-      ["erroSabor", "erroQuantidade", "erroNome", "erroCpf", "erroWhats", "erroRetirante"]
-        .forEach(id => {
-          document.getElementById(id).textContent = "";
-        });
-    }
-
-    const cpfInput = document.getElementById("cpf");
-    cpfInput.addEventListener("input", () => {
-      cpfInput.value = mascaraCPF(cpfInput.value);
-    });
-
-    const whatsInput = document.getElementById("whats");
-    whatsInput.addEventListener("input", () => {
-      whatsInput.value = mascaraWhats(whatsInput.value);
-    });
-
     const form = document.getElementById("pedidoForm");
+    const adicionarSaborBtn = document.getElementById("adicionarSabor");
+    const itensPedido = document.getElementById("itensPedido");
 
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      limparErros();
+    // Aplica máscaras enquanto digita
+    document.getElementById("cpf").addEventListener("input", e => {
+      e.target.value = mascaraCPF(e.target.value);
+    });
 
-      const sabor = document.getElementById("sabor").value;
-      const quantidade = document.getElementById("quantidade").value;
-      const nome = document.getElementById("nome").value.trim();
-      const cpf = document.getElementById("cpf").value.trim();
-      const whats = document.getElementById("whats").value.trim();
-      const retirante = document.getElementById("retirante").value.trim();
+    document.getElementById("whats").addEventListener("input", e => {
+      e.target.value = mascaraWhats(e.target.value);
+    });
+
+    // Adicionar novo sabor
+    adicionarSaborBtn.addEventListener("click", () => {
+      const index = itensPedido.children.length + 1;
+
+      const div = document.createElement("div");
+      div.classList.add("itemPedido");
+      div.innerHTML = `
+        <label for="sabor${index}">Sabor</label>
+        <select id="sabor${index}" class="sabor" required aria-required="true" aria-label="Sabor da pizza">
+          <option value="" disabled selected>Selecione um sabor</option>
+          <option value="Mussarela">Mussarela</option>
+          <option value="Calabresa">Calabresa</option>
+        </select>
+        <div class="error-msg"></div>
+
+        <label for="quantidade${index}">Quantidade</label>
+        <input
+          id="quantidade${index}"
+          type="number"
+          min="1"
+          value="1"
+          required
+          aria-required="true"
+          class="quantidade"
+          aria-label="Quantidade de pizzas para este sabor"
+        />
+        <div class="error-msg"></div>
+
+        <button type="button" class="removerItem" aria-label="Remover este sabor do pedido" title="Remover sabor">✕</button>
+      `;
+
+      itensPedido.appendChild(div);
+
+      div.querySelector(".removerItem").addEventListener("click", () => {
+        if (itensPedido.children.length > 1) {
+          div.remove();
+        } else {
+          alert("Você deve manter pelo menos um sabor no pedido.");
+        }
+      });
+    });
+
+    // Remover item já existente
+    document.querySelectorAll(".removerItem").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        if (itensPedido.children.length > 1) {
+          e.target.closest(".itemPedido").remove();
+        } else {
+          alert("Você deve manter pelo menos um sabor no pedido.");
+        }
+      });
+    });
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      // Limpar erros anteriores
+      document.querySelectorAll(".error-msg").forEach(el => (el.textContent = ""));
 
       let valido = true;
 
-      if (!sabor) {
-        document.getElementById("erroSabor").textContent = "Por favor, selecione um sabor.";
-        valido = false;
-      }
+      // Valida sabores e quantidades
+      const sabores = form.querySelectorAll(".sabor");
+      const quantidades = form.querySelectorAll(".quantidade");
 
-      if (!quantidade || quantidade <= 0) {
-        document.getElementById("erroQuantidade").textContent = "Informe uma quantidade válida.";
-        valido = false;
-      }
+      sabores.forEach((select, i) => {
+        if (!select.value) {
+          valido = false;
+          select.nextElementSibling.textContent = "Selecione um sabor.";
+        }
+      });
 
+      quantidades.forEach((input) => {
+        if (!input.value || input.value < 1) {
+          valido = false;
+          input.nextElementSibling.textContent = "Quantidade inválida.";
+        }
+      });
+
+      // Nome
+      const nome = form.nome.value.trim();
       if (!nome) {
-        document.getElementById("erroNome").textContent = "Informe seu nome completo.";
         valido = false;
+        document.getElementById("erroNome").textContent = "Digite seu nome completo.";
       }
 
-      if (!cpf) {
-        document.getElementById("erroCpf").textContent = "Informe seu CPF.";
+      // CPF
+      const cpf = form.cpf.value.trim();
+      if (!validarCPF(cpf)) {
         valido = false;
-      } else if (!validarCPF(cpf)) {
         document.getElementById("erroCpf").textContent = "CPF inválido.";
-        valido = false;
       }
 
-      if (!whats) {
-        document.getElementById("erroWhats").textContent = "Informe seu WhatsApp.";
+      // WhatsApp
+      const whats = form.whats.value.trim();
+      if (whats.length < 14) {
         valido = false;
-      } else if (whats.length < 14) {
-        document.getElementById("erroWhats").textContent = "Número de WhatsApp incompleto.";
-        valido = false;
+        document.getElementById("erroWhats").textContent = "Número WhatsApp incompleto.";
       }
 
+      // Retirante
+      const retirante = form.retirante.value.trim();
       if (!retirante) {
-        document.getElementById("erroRetirante").textContent = "Informe quem vai retirar o pedido.";
         valido = false;
+        document.getElementById("erroRetirante").textContent = "Informe o nome de quem vai retirar.";
       }
 
       if (!valido) return;
 
-      const mensagem = 
-`🍕 Pedido - Pizzaria Mirim 🍕
-Sabor: ${sabor}
-Quantidade: ${quantidade}
-Nome: ${nome}
-CPF: ${cpf}
-WhatsApp: ${whats}
-Quem vai retirar: ${retirante}
+      // Montar mensagem para WhatsApp e e-mail
+      let mensagem = `*Pedido Pizzaria Mirim*\n\n`;
+      mensagem += `*Itens:*\n`;
 
-CNPJ para pagamento via PIX: 47.746.532/0001-36`;
+      for (let i = 0; i < sabores.length; i++) {
+        mensagem += `- ${quantidades[i].value}x ${sabores[i].value}\n`;
+      }
 
-      const numeroWhats = "5518992033059"; // número no formato internacional
-      const linkWhats = `https://wa.me/${numeroWhats}?text=${encodeURIComponent(mensagem)}`;
-      window.open(linkWhats, "_blank");
+      mensagem += `\n*Cliente:* ${nome}\n`;
+      mensagem += `*CPF:* ${cpf}\n`;
+      mensagem += `*WhatsApp:* ${whats}\n`;
+      mensagem += `*Retirante:* ${retirante}\n`;
 
-      const mailto = `mailto:eventosfundacaomirimaracatuba@gmail.com?subject=Pedido%20de%20Pizza&body=${encodeURIComponent(mensagem)}`;
-      window.location.href = mailto;
+      // Link para WhatsApp (número do pizzaria aqui)
+      const numeroPizzaria = "5518992033059"; // Alterar para número real
 
-      form.reset();
+      const urlWhats = `https://api.whatsapp.com/send?phone=${numeroPizzaria}&text=${encodeURIComponent(mensagem)}`;
+
+      // Abrir WhatsApp no navegador
+      window.open(urlWhats, "_blank");
+
+      // Envio para e-mail via mailto (opcional)
+      /*
+      const mailto = `mailto:pizzaria@email.com?subject=Pedido Pizzaria Mirim&body=${encodeURIComponent(mensagem)}`;
+      window.open(mailto, "_blank");
+      */
     });
 
-    // Função para criar pizzas caindo periodicamente
+    // --- Pizzas caindo ---
+    const pizzaURL = "https://cdn-icons-png.flaticon.com/512/3595/3595455.png";
+
     function criarPizza() {
       const pizza = document.createElement("img");
-      pizza.src = "https://cdn-icons-png.flaticon.com/512/3595/3595455.png";
+      pizza.src = pizzaURL;
       pizza.classList.add("pizza-falling");
-      pizza.style.left = Math.random() * window.innerWidth + "px";
-      pizza.style.animationDuration = (4 + Math.random() * 3) + "s"; // entre 4 e 7 segundos
+
+      const maxX = window.innerWidth - 40;
+      pizza.style.left = Math.floor(Math.random() * maxX) + "px";
+
+      const duracao = 5000 + Math.random() * 5000;
+      pizza.style.animationDuration = duracao + "ms";
+
+      pizza.style.animationDelay = Math.random() * 10 + "ms";
 
       document.body.appendChild(pizza);
 
@@ -518,10 +697,11 @@ CNPJ para pagamento via PIX: 47.746.532/0001-36`;
       });
     }
 
-    // Criar uma pizza caindo a cada 500ms
-    setInterval(criarPizza, 500);
+    setInterval(criarPizza, 600);
+
+    for (let i = 0; i < 10; i++) {
+      setTimeout(criarPizza, i * 350);
+    }
   </script>
 </body>
 </html>
-
-
