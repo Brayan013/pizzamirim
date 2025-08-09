@@ -194,7 +194,7 @@
       text-shadow: 0 0 3px #000;
     }
 
-    /* Pizzas caindo - correção */
+    /* Pizzas caindo */
     .pizza-falling {
       position: fixed;
       top: 0;
@@ -368,12 +368,51 @@
         align-self: flex-start;
       }
     }
+    .promocao {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: red;
+  color: yellow;
+  font-weight: bold;
+  font-size: 1.5rem;
+  padding: 10px 25px;
+  border-radius: 12px;
+  box-shadow:
+    0 0 10px yellow,
+    0 0 20px yellow,
+    0 0 40px yellow;
+  z-index: 100000;
+  animation: brilhoNeon 1.5s infinite alternate;
+  text-align: center;
+}
+
+@keyframes brilhoNeon {
+  from {
+    box-shadow:
+      0 0 5px yellow,
+      0 0 10px yellow,
+      0 0 20px yellow;
+  }
+  to {
+    box-shadow:
+      0 0 15px yellow,
+      0 0 30px yellow,
+      0 0 60px yellow;
+  }
+}
+
   </style>
 </head>
 <body>
   <div class="top-right-logo" aria-label="Logo da empresa no canto superior direito" role="img">
     <img src="logo-neon.jpg" alt="Logo neon da empresa" />
   </div>
+
+  <div class="promocao">
+  🍕 Promoção: Todas as pizzas por <strong>R$35,00</strong> 🍕
+</div>
 
   <div class="container" role="main" aria-label="Formulário para fazer pedido de pizza">
     <img
@@ -462,6 +501,16 @@
       />
       <div class="error-msg" id="erroRetirante"></div>
 
+      <div id="valorTotal" style="
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #ffd580;
+  margin-top: 20px;
+  text-shadow: 0 0 8px #ff9900;
+">
+  Total: R$ 0,00
+</div>
+
       <button type="submit" aria-label="Enviar pedido por WhatsApp e email">
         Enviar pedido (WhatsApp + E-mail)
       </button>
@@ -477,7 +526,19 @@
     Todo recurso arrecadado será destinado aos adolescentes matriculados.
   </footer>
 
-  <script>
+ <script>
+    function atualizarTotal() {
+      const precoPizza = 35;
+      let totalPizzas = 0;
+      document.querySelectorAll(".quantidade").forEach(input => {
+        let qtd = parseInt(input.value) || 0;
+        totalPizzas += qtd;
+      });
+      let valorTotal = totalPizzas * precoPizza;
+      document.getElementById("valorTotal").textContent = 
+        `Total: R$ ${valorTotal.toFixed(2).replace('.', ',')}`;
+    }
+
     // Máscara CPF
     function mascaraCPF(cpf) {
       return cpf
@@ -570,13 +631,21 @@
 
       itensPedido.appendChild(div);
 
+      // Eventos para atualizar total
+      div.querySelectorAll(".quantidade, .sabor").forEach(el => {
+        el.addEventListener("input", atualizarTotal);
+      });
+
       div.querySelector(".removerItem").addEventListener("click", () => {
         if (itensPedido.children.length > 1) {
           div.remove();
+          atualizarTotal();
         } else {
           alert("Você deve manter pelo menos um sabor no pedido.");
         }
       });
+
+      atualizarTotal();
     });
 
     // Remover item já existente
@@ -584,11 +653,18 @@
       btn.addEventListener("click", (e) => {
         if (itensPedido.children.length > 1) {
           e.target.closest(".itemPedido").remove();
+          atualizarTotal();
         } else {
           alert("Você deve manter pelo menos um sabor no pedido.");
         }
       });
     });
+
+    // Eventos iniciais para atualizar total
+    document.querySelectorAll(".quantidade, .sabor").forEach(el => {
+      el.addEventListener("input", atualizarTotal);
+    });
+    atualizarTotal();
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -646,6 +722,12 @@
 
       if (!valido) return;
 
+      // Calcular total
+      const precoPizza = 35;
+      let totalPizzas = 0;
+      quantidades.forEach(q => totalPizzas += parseInt(q.value) || 0);
+      let valorTotal = totalPizzas * precoPizza;
+
       // Montar mensagem para WhatsApp e e-mail
       let mensagem = `*Pedido Pizzaria Mirim*\n\n`;
       mensagem += `*Itens:*\n`;
@@ -654,24 +736,16 @@
         mensagem += `- ${quantidades[i].value}x ${sabores[i].value}\n`;
       }
 
+      mensagem += `\n*Total:* R$ ${valorTotal.toFixed(2).replace('.', ',')}\n`;
       mensagem += `\n*Cliente:* ${nome}\n`;
       mensagem += `*CPF:* ${cpf}\n`;
       mensagem += `*WhatsApp:* ${whats}\n`;
       mensagem += `*Retirante:* ${retirante}\n`;
 
-      // Link para WhatsApp (número do pizzaria aqui)
       const numeroPizzaria = "5518992033059"; // Alterar para número real
-
       const urlWhats = `https://api.whatsapp.com/send?phone=${numeroPizzaria}&text=${encodeURIComponent(mensagem)}`;
 
-      // Abrir WhatsApp no navegador
       window.open(urlWhats, "_blank");
-
-      // Envio para e-mail via mailto (opcional)
-      /*
-      const mailto = `mailto:pizzaria@email.com?subject=Pedido Pizzaria Mirim&body=${encodeURIComponent(mensagem)}`;
-      window.open(mailto, "_blank");
-      */
     });
 
     // --- Pizzas caindo ---
@@ -687,7 +761,6 @@
 
       const duracao = 5000 + Math.random() * 5000;
       pizza.style.animationDuration = duracao + "ms";
-
       pizza.style.animationDelay = Math.random() * 10 + "ms";
 
       document.body.appendChild(pizza);
@@ -698,10 +771,9 @@
     }
 
     setInterval(criarPizza, 600);
-
     for (let i = 0; i < 10; i++) {
       setTimeout(criarPizza, i * 350);
     }
-  </script>
+</script>
 </body>
 </html>
